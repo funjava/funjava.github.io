@@ -5,15 +5,12 @@
   
   <title>倒屋阁</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description">
-<meta property="og:type" content="website">
+  <meta property="og:type" content="website">
 <meta property="og:title" content="倒屋阁">
 <meta property="og:url" content="http://kkzhou.com/index.html">
 <meta property="og:site_name" content="倒屋阁">
-<meta property="og:description">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="倒屋阁">
-<meta name="twitter:description">
   
     <link rel="alternative" href="/atom.xml" title="倒屋阁" type="application/atom+xml">
   
@@ -21,7 +18,7 @@
     <link rel="icon" href="/favicon.png">
   
   <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
   
 
 </head>
@@ -91,7 +88,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>#Java常见GC参数介绍<br>以下是经常配置用来优化JVM的一些参数</p>
+        <p>以下是经常配置用来优化JVM的一些参数</p>
 <blockquote>
 <ul>
 <li>-Xmx2g -Xms2g 表示堆为2G </li>
@@ -102,17 +99,16 @@
 <li>-XX:+UseConcMarkSweepGC 表示使用CMS </li>
 <li>-XX:+CMSParallelRemarkEnabled 表示并行remark </li>
 <li>-XX:+UseCMSCompactAtFullCollection 表示在FGC之后进行压缩，因为CMS默认不压缩空间的。 </li>
-<li>-XX:+UseCMSInitiatingOccupancyOnly 表示只在到达阀值的时候，才进行CMS GC</li>
-<li>-XX:CMSInitiatingOccupancyFraction=70 设置阀值为70%，默认为68%。 </li>
-<li>-XX:+UseCompressedOops JVM优化之压缩普通对象指针（CompressedOops），通常64位JVM消耗的内存会比32位的大1.5倍，这是因为对象指针在64位架构下，长度会翻倍（更宽的寻址）。对于那些将要从32位平台移植到64位的应用来说，平白无辜多了1/2的内存占用，这是开发者不愿意看到的。幸运的是，从JDK 1.6 update14开始，64 bit JVM正式支持了 -XX:+UseCompressedOops 这个可以压缩指针，起到节约内存占用的新参数.</li>
-<li>关于-XX:+UseCMSInitiatingOccupancyOnly 和 -XX:CMSInitiatingOccupancyFraction ，详细解释见下：<figure class="highlight"><figcaption><span>concurrent collection generally cannot be sped up but it can be started earlier.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A concurrent collection starts running when the percentage of allocated space in the old generation crosses a threshold. This threshold is calculated based on general experience with the concurrent collector. If full collections are occurring, the concurrent collections may need to be started earlier. The command line flag CMSInitiatingOccupancyFraction can be used to set the level at which the collection is started. Its default value is approximately 68%. The command line to adjust the value is&#10;-XX:CMSInitiatingOccupancyFraction=&#60;percent&#62;&#10;The concurrent collector also keeps statistics on the promotion rate into the old generation for the application and makes a prediction on when to start a concurrent collection based on that promotion rate and the available free space in the old generation. Whereas the use of CMSInitiatingOccupancyFraction must be conservative to avoid full collections over the life of the application, the start of a concurrent collection based on the anticipated promotion adapts to the changing requirements of the application. The statistics that are used to calculate the promotion rate are based on the recent concurrent collections. The promotion rate is not calculated until at least one concurrent collection has completed so at least the first concurrent collection has to be initiated because the occupancy has reached CMSInitiatingOccupancyFraction . Setting CMSInitiatingOccupancyFraction to 100 would not cause only the anticipated promotion to be used to start a concurrent collection but would rather cause only non-concurrent collections to occur since a concurrent collection would not start until it was already too late. To eliminate the use of the anticipated promotions to start a concurrent collection set UseCMSInitiatingOccupancyOnly to true.&#10;-XX:+UseCMSInitiatingOccupancyOnly.</span><br></pre></td></tr></table></figure></li>
-</ul>
-</blockquote>
-
+<li>-XX:+UseCMSInitiatingOccupancyOnly 表示只在到达阀值的时候，才进行CMS GC
+        
+          <p class="article-more-link">
+            <a href="/2016/11/30/Java常见GC参数介绍/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://kkzhou.com/2016/11/30/Java常见GC参数介绍/" data-id="ciw4zkkdn000aakoj53yfajsx" class="article-share-link">Share</a>
+      <a data-url="http://kkzhou.com/2016/11/30/Java常见GC参数介绍/" data-id="ciw515xeq0001ckojk4qigznr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
@@ -150,62 +146,19 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="用s命令替换">用s命令替换</h2><p>我使用下面的这段文本做演示：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cat pets.txt&#10;This is my cat&#10;  my cat&#39;s name is betty&#10;This is my dog&#10;  my dog&#39;s name is frank&#10;This is my fish&#10;  my fish&#39;s name is george&#10;This is my goat&#10;  my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>把其中的my字符串替换成Hao Chen’s，下面的语句应该很好理解（s表示替换命令，/my/表示匹配my，/Hao Chen’s/表示把匹配替换成Hao Chen’s，/g 表示一行上的替换所有的匹配）：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;s/my/Hao Chen&#39;s/g&#34; pets.txt&#10;This is Hao Chen&#39;s cat&#10;  Hao Chen&#39;s cat&#39;s name is betty&#10;This is Hao Chen&#39;s dog&#10;  Hao Chen&#39;s dog&#39;s name is frank&#10;This is Hao Chen&#39;s fish&#10;  Hao Chen&#39;s fish&#39;s name is george&#10;This is Hao Chen&#39;s goat&#10;  Hao Chen&#39;s goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>注意：如果你要使用单引号，那么你没办法通过\’这样来转义，就有双引号就可以了，在双引号内可以用\”来转义。<br>再注意：上面的sed并没有对文件的内容改变，只是把处理过后的内容输出，如果你要写回文件，你可以使用重定向，如：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;s/my/Hao Chen&#39;s/g&#34; pets.txt &#62; hao_pets.txt</span><br></pre></td></tr></table></figure></p>
-<p>或使用 -i 参数直接修改文件内容：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed -i &#34;s/my/Hao Chen&#39;s/g&#34; pets.txt</span><br></pre></td></tr></table></figure></p>
-<p>在每一行最前面加点东西：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;s/^/#/g&#39; pets.txt&#10;#This is my cat&#10;#  my cat&#39;s name is betty&#10;#This is my dog&#10;#  my dog&#39;s name is frank&#10;#This is my fish&#10;#  my fish&#39;s name is george&#10;#This is my goat&#10;#  my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>在每一行最后面加点东西：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;s/$/ --- /g&#39; pets.txt&#10;This is my cat ---&#10;  my cat&#39;s name is betty ---&#10;This is my dog ---&#10;  my dog&#39;s name is frank ---&#10;This is my fish ---&#10;  my fish&#39;s name is george ---&#10;This is my goat ---&#10;  my goat&#39;s name is adam ---</span><br></pre></td></tr></table></figure></p>
-<p>顺手介绍一下正则表达式的一些最基本的东西：</p>
-<blockquote>
-<ul>
-<li>^ 表示一行的开头。如：/^#/ 以#开头的匹配。</li>
-<li>$ 表示一行的结尾。如：/}$/ 以}结尾的匹配。</li>
-<li>\&lt; 表示词首。 如 \&lt;abc 表示以 abc 为首的詞。</li>
-<li>> 表示词尾。 如 abc> 表示以 abc 結尾的詞。</li>
-<li>. 表示任何单个字符。</li>
-<li>* 表示某个字符出现了0次或多次。</li>
-<li>[ ] 字符集合。如：[abc]表示匹配a或b或c，还有[a-zA-Z]表示匹配所有的26个字符。如果其中有^表示反，如[^a]表示非a的字符</li>
-</ul>
-</blockquote>
-<p>正规则表达式是一些很牛的事，比如我们要去掉某html中的tags：<br>html.txt<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;b&#62;This&#60;/b&#62; is what &#60;span style=&#34;text-decoration: underline;&#34;&#62;I&#60;/span&#62; meant. Understand?</span><br></pre></td></tr></table></figure></p>
-<p>看看我们的sed命令:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># &#22914;&#26524;&#20320;&#36825;&#26679;&#25630;&#30340;&#35805;&#65292;&#23601;&#20250;&#26377;&#38382;&#39064;&#10;$ sed &#39;s/&#60;.*&#62;//g&#39; html.txt&#10; Understand?&#10; &#10;# &#35201;&#35299;&#20915;&#19978;&#38754;&#30340;&#37027;&#20010;&#38382;&#39064;&#65292;&#23601;&#24471;&#20687;&#19979;&#38754;&#36825;&#26679;&#12290;&#10;# &#20854;&#20013;&#30340;&#39;[^&#62;]&#39; &#25351;&#23450;&#20102;&#38500;&#20102;&#62;&#30340;&#23383;&#31526;&#37325;&#22797;0&#27425;&#25110;&#22810;&#27425;&#12290;&#10;$ sed &#39;s/&#60;[^&#62;]*&#62;//g&#39; html.txt&#10;This is what I meant. Understand?</span><br></pre></td></tr></table></figure></p>
-<p>我们再来看看指定需要替换的内容：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;3s/my/your/g&#34; pets.txt&#10;This is my cat&#10;  my cat&#39;s name is betty&#10;This is your dog&#10;  my dog&#39;s name is frank&#10;This is my fish&#10;  my fish&#39;s name is george&#10;This is my goat&#10;  my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>下面的命令只替换第3到第6行的文本。<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;3,6s/my/your/g&#34; pets.txt&#10;This is my cat&#10;  my cat&#39;s name is betty&#10;This is your dog&#10;  your dog&#39;s name is frank&#10;This is your fish&#10;  your fish&#39;s name is george&#10;This is my goat&#10;  my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cat my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;This is my dog, my dog&#39;s name is frank&#10;This is my fish, my fish&#39;s name is george&#10;This is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure>
-<p>只替换每一行的第一个s：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;s/s/S/1&#39; my.txt&#10;ThiS is my cat, my cat&#39;s name is betty&#10;ThiS is my dog, my dog&#39;s name is frank&#10;ThiS is my fish, my fish&#39;s name is george&#10;ThiS is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>只替换每一行的第二个s：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;s/s/S/2&#39; my.txt&#10;This iS my cat, my cat&#39;s name is betty&#10;This iS my dog, my dog&#39;s name is frank&#10;This iS my fish, my fish&#39;s name is george&#10;This iS my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>只替换第一行的第3个以后的s：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;s/s/S/3g&#39; my.txt&#10;This is my cat, my cat&#39;S name iS betty&#10;This is my dog, my dog&#39;S name iS frank&#10;This is my fiSh, my fiSh&#39;S name iS george&#10;This is my goat, my goat&#39;S name iS adam</span><br></pre></td></tr></table></figure></p>
-<h2 id="多个匹配">多个匹配</h2><p>如果我们需要一次替换多个模式，可参看下面的示例：（第一个模式把第一行到第三行的my替换成your，第二个则把第3行以后的This替换成了That）<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;1,3s/my/your/g; 3,$s/This/That/g&#39; my.txt&#10;This is your cat, your cat&#39;s name is betty&#10;This is your dog, your dog&#39;s name is frank&#10;That is your fish, your fish&#39;s name is george&#10;That is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>上面的命令等价于：（注：下面使用的是sed的-e命令行参数）<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -e &#39;1,3s/my/your/g&#39; -e &#39;3,$s/This/That/g&#39; my.txt</span><br></pre></td></tr></table></figure></p>
-<p>我们可以使用&amp;来当做被匹配的变量，然后可以在基本左右加点东西。如下所示：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;s/my/[&#38;]/g&#39; my.txt&#10;This is [my] cat, [my] cat&#39;s name is betty&#10;This is [my] dog, [my] dog&#39;s name is frank&#10;This is [my] fish, [my] fish&#39;s name is george&#10;This is [my] goat, [my] goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<h2 id="圆括号匹配">圆括号匹配</h2><p>使用圆括号匹配的示例：（圆括号括起来的正则表达式所匹配的字符串会可以当成变量来使用，sed中使用的是\1,\2…）<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;s/This is my \([^,]*\),.*is \(.*\)/\1:\2/g&#39; my.txt&#10;cat:betty&#10;dog:frank&#10;fish:george&#10;goat:adam</span><br></pre></td></tr></table></figure></p>
-<p>上面这个例子中的正则表达式有点复杂，解开如下（去掉转义字符）：</p>
-<p>正则为：This is my ([^,]<em>),.</em>is (.*)<br>匹配为：This is my (cat),……….is (betty)</p>
-<p>然后：\1就是cat，\2就是betty</p>
-<h2 id="sed的命令">sed的命令</h2><p>让我们回到最一开始的例子pets.txt，让我们来看几个命令：</p>
-<h3 id="N命令">N命令</h3><p>先来看N命令 —— 把下一行的内容纳入当成缓冲区做匹配。</p>
-<p>下面的的示例会把原文本中的偶数行纳入奇数行匹配，而s只匹配并替换一次，所以，就成了下面的结果：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;N;s/my/your/&#39; pets.txt&#10;This is your cat&#10;  my cat&#39;s name is betty&#10;This is your dog&#10;  my dog&#39;s name is frank&#10;This is your fish&#10;  my fish&#39;s name is george&#10;This is your goat&#10;  my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>也就是说，原来的文件成了：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">This is my cat\n  my cat&#39;s name is betty&#10;This is my dog\n  my dog&#39;s name is frank&#10;This is my fish\n  my fish&#39;s name is george&#10;This is my goat\n  my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>这样一来，下面的例子你就明白了，<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;N;s/\n/,/&#39; pets.txt&#10;This is my cat,  my cat&#39;s name is betty&#10;This is my dog,  my dog&#39;s name is frank&#10;This is my fish,  my fish&#39;s name is george&#10;This is my goat,  my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<h3 id="a命令和i命令">a命令和i命令</h3><p>a命令就是append， i命令就是insert，它们是用来添加行的。如：<br>其中的1i表明，其要在第1行前插入一行（insert）<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;1 i This is my monkey, my monkey&#39;s name is wukong&#34; my.txt&#10;This is my monkey, my monkey&#39;s name is wukong&#10;This is my cat, my cat&#39;s name is betty&#10;This is my dog, my dog&#39;s name is frank&#10;This is my fish, my fish&#39;s name is george&#10;This is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>其中的1a表明，其要在最后一行后追加一行（append）<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;$ a This is my monkey, my monkey&#39;s name is wukong&#34; my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;This is my monkey, my monkey&#39;s name is wukong&#10;This is my dog, my dog&#39;s name is frank&#10;This is my fish, my fish&#39;s name is george&#10;This is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>我们可以运用匹配来添加文本：<br>注意其中的/fish/a，这意思是匹配到/fish/后就追加一行<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;/fish/a This is my monkey, my monkey&#39;s name is wukong&#34; my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;This is my dog, my dog&#39;s name is frank&#10;This is my fish, my fish&#39;s name is george&#10;This is my monkey, my monkey&#39;s name is wukong&#10;This is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<p>下面这个例子是对每一行都挺插入：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;/my/a ----&#34; my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;----&#10;This is my dog, my dog&#39;s name is frank&#10;----&#10;This is my fish, my fish&#39;s name is george&#10;----&#10;This is my goat, my goat&#39;s name is adam&#10;----</span><br></pre></td></tr></table></figure></p>
-<h3 id="c命令">c命令</h3><p>c 命令是替换匹配行<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;2 c This is my monkey, my monkey&#39;s name is wukong&#34; my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;This is my monkey, my monkey&#39;s name is wukong&#10;This is my fish, my fish&#39;s name is george&#10;This is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#34;/fish/c This is my monkey, my monkey&#39;s name is wukong&#34; my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;This is my dog, my dog&#39;s name is frank&#10;This is my monkey, my monkey&#39;s name is wukong&#10;This is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure>
-<h3 id="d命令">d命令</h3><p>删除匹配行<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;/fish/d&#39; my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;This is my dog, my dog&#39;s name is frank&#10;This is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;2d&#39; my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;This is my fish, my fish&#39;s name is george&#10;This is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;2,$d&#39; my.txt&#10;This is my cat, my cat&#39;s name is betty</span><br></pre></td></tr></table></figure>
-<h3 id="p命令">p命令</h3><p><strong>打印命令</strong><br>你可以把这个命令当成grep式的命令,匹配fish并输出，可以看到fish的那一行被打了两遍，这是因为sed处理时会把处理的信息输出:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed &#39;/fish/p&#39; my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;This is my dog, my dog&#39;s name is frank&#10;This is my fish, my fish&#39;s name is george&#10;This is my fish, my fish&#39;s name is george&#10;This is my goat, my goat&#39;s name is adam</span><br></pre></td></tr></table></figure></p>
-<h4 id="使用n参数就好了">使用n参数就好了</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed -n &#39;/fish/p&#39; my.txt&#10;This is my fish, my fish&#39;s name is george</span><br></pre></td></tr></table></figure>
-<h4 id="从一个模式到另一个模式">从一个模式到另一个模式</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed -n &#39;/dog/,/fish/p&#39; my.txt&#10;This is my dog, my dog&#39;s name is frank&#10;This is my fish, my fish&#39;s name is george</span><br></pre></td></tr></table></figure>
-<h4 id="从第一行打印到匹配fish成功的那一行">从第一行打印到匹配fish成功的那一行</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sed -n &#39;1,/fish/p&#39; my.txt&#10;This is my cat, my cat&#39;s name is betty&#10;This is my dog, my dog&#39;s name is frank&#10;This is my fish, my fish&#39;s name is george</span><br></pre></td></tr></table></figure>
-
+        <h2 id="用s命令替换"><a href="#用s命令替换" class="headerlink" title="用s命令替换"></a>用s命令替换</h2><p>我使用下面的这段文本做演示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$ cat pets.txt</div><div class="line">This is my cat</div><div class="line">  my cat&apos;s name is betty</div><div class="line">This is my dog</div><div class="line">  my dog&apos;s name is frank</div><div class="line">This is my fish</div><div class="line">  my fish&apos;s name is george</div><div class="line">This is my goat</div><div class="line">  my goat&apos;s name is adam</div></pre></td></tr></table></figure></p>
+<p>把其中的my字符串替换成Hao Chen’s，下面的语句应该很好理解（s表示替换命令，/my/表示匹配my，/Hao Chen’s/表示把匹配替换成Hao Chen’s，/g 表示一行上的替换所有的匹配）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$ sed &quot;s/my/Hao Chen&apos;s/g&quot; pets.txt</div><div class="line">This is Hao Chen&apos;s cat</div><div class="line">  Hao Chen&apos;s cat&apos;s name is betty</div><div class="line">This is Hao Chen&apos;s dog</div><div class="line">  Hao Chen&apos;s dog&apos;s name is frank</div><div class="line">This is Hao Chen&apos;s fish</div><div class="line">  Hao Chen&apos;s fish&apos;s name is george</div><div class="line">This is Hao Chen&apos;s goat</div><div class="line">  Hao Chen&apos;s goat&apos;s name is adam</div></pre></td></tr></table></figure></p>
+<p>注意：如果你要使用单引号，那么你没办法通过\’这样来转义，就有双引号就可以了，在双引号内可以用\”来转义。<br>再注意：上面的sed并没有对文件的内容改变，只是把处理过后的内容输出，如果你要写回文件，你可以使用重定向，如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sed &quot;s/my/Hao Chen&apos;s/g&quot; pets.txt &gt; hao_pets.txt</div></pre></td></tr></table></figure></p>
+<p>或使用 -i 参数直接修改文件内容：
+        
+          <p class="article-more-link">
+            <a href="/2015/12/12/sed-command/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://kkzhou.com/2015/12/12/sed-command/" data-id="ciw4zkkcp0001akoj2bi4n4bg" class="article-share-link">Share</a>
+      <a data-url="http://kkzhou.com/2015/12/12/sed-command/" data-id="ciw515xf30004ckojbeda077r" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux命令/">Linux命令</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Sed/">Sed</a></li></ul>
@@ -240,17 +193,17 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>这是<strong>新的开始</strong>，我用hexo创建了第一篇文章。</p>
-<p>通过下面的命令，就可以创建新文章<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">D:\workspace\javascript\nodejs-hexo&#62;hexo new &#26032;&#30340;&#24320;&#22987;&#10;[info] File created at D:\workspace\javascript\nodejs-hexo\source\_posts\&#26032;&#30340;&#24320;&#22987;.md</span><br></pre></td></tr></table></figure></p>
+<p>通过下面的命令，就可以创建新文章<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">D:\workspace\javascript\nodejs-hexo&gt;hexo new 新的开始</div><div class="line">[info] File created at D:\workspace\javascript\nodejs-hexo\source\_posts\新的开始.md</div></pre></td></tr></table></figure></p>
 <p>感觉非常好。</p>
-<h2 id="引用">引用</h2><blockquote><p>Every interaction is both precious and an opportunity to delight.</p>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><blockquote><p>Every interaction is both precious and an opportunity to delight.</p>
 <footer><strong>Seth Godin</strong><cite><a href="http://sethgodin.typepad.com/seths_blog/2009/07/welcome-to-island-marketing.html" target="_blank" rel="external">Welcome to Island Marketing</a></cite></footer></blockquote>
-<h2 id="代码块">代码块</h2><figure class="highlight cpp"><figcaption><span>.compact</span><a href="http://underscorejs.org/#compact" target="_blank" rel="external">Underscore.js</a></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.compact([<span class="number">0</span>, <span class="number">1</span>, <span class="literal">false</span>, <span class="number">2</span>, ‘’, <span class="number">3</span>]);</span><br><span class="line">=&gt; [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br></pre></td></tr></table></figure>
-<h2 id="链接">链接</h2><a href="https://www.google.com.hk" title="谷歌" target="_blank">谷歌</a>
-<h2 id="图片">图片</h2><img src="/images/fens.me.png" width="400" height="600" title="这是一张图片">
+<h2 id="代码块"><a href="#代码块" class="headerlink" title="代码块"></a>代码块</h2><figure class="highlight excel"><figcaption><span>.compact</span><a href="http://underscorejs.org/#compact" target="_blank" rel="external">Underscore.js</a></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">.compact([<span class="number">0</span>, <span class="number">1</span>, <span class="built_in">false</span>, <span class="number">2</span>, ‘’, <span class="number">3</span>]);</div><div class="line">=&gt; [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</div></pre></td></tr></table></figure>
+<h2 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h2><a href="https://www.google.com.hk" title="谷歌" target="_blank">谷歌</a>
+<h2 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h2><img src="/images/fens.me.png" width="400" height="600" title="这是一张图片">
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://kkzhou.com/2015/11/01/hexo使用示例/" data-id="ciw4zkkdf0008akojaoykjwng" class="article-share-link">Share</a>
+      <a data-url="http://kkzhou.com/2015/11/01/hexo使用示例/" data-id="ciw515xf00003ckoj5q8l9p8d" class="article-share-link">Share</a>
       
       
     </footer>
@@ -262,8 +215,8 @@
   
     <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2015/11/01/hello-world/" class="article-date">
-  <time datetime="2015-11-01T08:10:32.336Z" itemprop="datePublished">2015-11-01</time>
+    <a href="/2015/10/31/hello-world/" class="article-date">
+  <time datetime="2015-10-31T11:32:38.170Z" itemprop="datePublished">2015-10-31</time>
 </a>
     
   </div>
@@ -274,7 +227,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2015/11/01/hello-world/">Hello World</a>
+      <a class="article-title" href="/2015/10/31/hello-world/">Hello World</a>
     </h1>
   
 
@@ -283,19 +236,19 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick_Start">Quick Start</h2><h3 id="Create_a_new_post">Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
 <p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run_server">Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
 <p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate_static_files">Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
 <p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy_to_remote_sites">Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
 <p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://kkzhou.com/2015/11/01/hello-world/" data-id="ciw4zkkdj0009akoj0bytli3j" class="article-share-link">Share</a>
+      <a data-url="http://kkzhou.com/2015/10/31/hello-world/" data-id="ciw515xey0002ckojhnxub4lm" class="article-share-link">Share</a>
       
       
     </footer>
@@ -341,7 +294,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -365,7 +318,7 @@
           </li>
         
           <li>
-            <a href="/2015/11/01/hello-world/">Hello World</a>
+            <a href="/2015/10/31/hello-world/">Hello World</a>
           </li>
         
       </ul>
@@ -402,11 +355,11 @@
 <script src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 
 
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
-  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
 
 
-<script src="/js/script.js" type="text/javascript"></script>
+<script src="/js/script.js"></script>
   </div>
 </body>
 </html>
