@@ -4,7 +4,7 @@
   <subtitle><![CDATA[所见的是暂时的，所不见的是永远的]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://kkzhou.com/"/>
-  <updated>2015-12-12T08:24:23.000Z</updated>
+  <updated>2016-11-30T13:46:24.196Z</updated>
   <id>http://kkzhou.com/</id>
   
   <author>
@@ -13,6 +13,43 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[Java常见GC参数介绍]]></title>
+    <link href="http://kkzhou.com/2016/11/30/Java%E5%B8%B8%E8%A7%81GC%E5%8F%82%E6%95%B0%E4%BB%8B%E7%BB%8D/"/>
+    <id>http://kkzhou.com/2016/11/30/Java常见GC参数介绍/</id>
+    <published>2016-11-30T13:44:15.000Z</published>
+    <updated>2016-11-30T13:46:24.196Z</updated>
+    <content type="html"><![CDATA[<p>#Java常见GC参数介绍<br>以下是经常配置用来优化JVM的一些参数</p>
+<blockquote>
+<ul>
+<li>-Xmx2g -Xms2g 表示堆为2G </li>
+<li>-Xmn256m 表示新生代为 256m </li>
+<li>-Xss256k 设置每个线程的堆栈大小。JDK5.0以后每个线程堆栈大小为1M，以前每个线程堆栈大小为256K。更具应用的线程所需内存大小进行调整。在相同物理内存下，减小这个值能生成更多的线程。但是操作系统对一个进程内的线程数还是有限制的，不能无限生成，经验值在3000~5000左右</li>
+<li>-XX:PermSize=128m 表示永久区为128m </li>
+<li>-XX:+DisableExplicitGC 禁用显示的gc，程序程序中使用System.gc()中进行垃圾回收，使用这个参数后系统自动将 System.gc() 调用转换成一个空操作</li>
+<li>-XX:+UseConcMarkSweepGC 表示使用CMS </li>
+<li>-XX:+CMSParallelRemarkEnabled 表示并行remark </li>
+<li>-XX:+UseCMSCompactAtFullCollection 表示在FGC之后进行压缩，因为CMS默认不压缩空间的。 </li>
+<li>-XX:+UseCMSInitiatingOccupancyOnly 表示只在到达阀值的时候，才进行CMS GC</li>
+<li>-XX:CMSInitiatingOccupancyFraction=70 设置阀值为70%，默认为68%。 </li>
+<li>-XX:+UseCompressedOops JVM优化之压缩普通对象指针（CompressedOops），通常64位JVM消耗的内存会比32位的大1.5倍，这是因为对象指针在64位架构下，长度会翻倍（更宽的寻址）。对于那些将要从32位平台移植到64位的应用来说，平白无辜多了1/2的内存占用，这是开发者不愿意看到的。幸运的是，从JDK 1.6 update14开始，64 bit JVM正式支持了 -XX:+UseCompressedOops 这个可以压缩指针，起到节约内存占用的新参数.</li>
+<li>关于-XX:+UseCMSInitiatingOccupancyOnly 和 -XX:CMSInitiatingOccupancyFraction ，详细解释见下：<figure class="highlight"><figcaption><span>concurrent collection generally cannot be sped up but it can be started earlier.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A concurrent collection starts running when the percentage of allocated space in the old generation crosses a threshold. This threshold is calculated based on general experience with the concurrent collector. If full collections are occurring, the concurrent collections may need to be started earlier. The command line flag CMSInitiatingOccupancyFraction can be used to set the level at which the collection is started. Its default value is approximately 68%. The command line to adjust the value is&#10;-XX:CMSInitiatingOccupancyFraction=&#60;percent&#62;&#10;The concurrent collector also keeps statistics on the promotion rate into the old generation for the application and makes a prediction on when to start a concurrent collection based on that promotion rate and the available free space in the old generation. Whereas the use of CMSInitiatingOccupancyFraction must be conservative to avoid full collections over the life of the application, the start of a concurrent collection based on the anticipated promotion adapts to the changing requirements of the application. The statistics that are used to calculate the promotion rate are based on the recent concurrent collections. The promotion rate is not calculated until at least one concurrent collection has completed so at least the first concurrent collection has to be initiated because the occupancy has reached CMSInitiatingOccupancyFraction . Setting CMSInitiatingOccupancyFraction to 100 would not cause only the anticipated promotion to be used to start a concurrent collection but would rather cause only non-concurrent collections to occur since a concurrent collection would not start until it was already too late. To eliminate the use of the anticipated promotions to start a concurrent collection set UseCMSInitiatingOccupancyOnly to true.&#10;-XX:+UseCMSInitiatingOccupancyOnly.</span><br></pre></td></tr></table></figure></li>
+</ul>
+</blockquote>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>#Java常见GC参数介绍<br>以下是经常配置用来优化JVM的一些参数</p>
+<blockquote>
+<ul>
+<li>-Xmx2g -Xms2g 表示堆为2G </li>
+<li>-Xmn256m 表示新生代为 256m </li>
+<li>-Xss256k 设置每]]>
+    </summary>
+    
+      <category term="JVM" scheme="http://kkzhou.com/tags/JVM/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[sed 简明教程]]></title>
