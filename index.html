@@ -66,6 +66,69 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-细说TCP滑动窗口" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/12/04/细说TCP滑动窗口/" class="article-date">
+  <time datetime="2016-12-04T01:55:57.000Z" itemprop="datePublished">2016-12-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/04/细说TCP滑动窗口/">细说TCP滑动窗口</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>将TCP与UDP这样的简单传输协议区分开来的是它传输数据的质量。TCP对于发送数据进行跟踪，这种数据管理需要协议有以下两大关键功能：</p>
+<blockquote>
+<ul>
+<li>可靠性：保证数据确实到达目的地。如果未到达，能够发现并重传。</li>
+<li>数据流控：管理数据的发送速率，以使接收设备不致于过载。</li>
+</ul>
+</blockquote>
+<p>要完成这些任务，整个协议操作是围绕滑动窗口确认机制来进行的。因此，理解了滑动窗口，也就是理解了TCP。</p>
+<h2 id="更多信息"><a href="#更多信息" class="headerlink" title="更多信息"></a>更多信息</h2><h3 id="TCP面向流的滑动窗口确认机制"><a href="#TCP面向流的滑动窗口确认机制" class="headerlink" title="TCP面向流的滑动窗口确认机制:"></a>TCP面向流的滑动窗口确认机制:</h3><p>TCP将独立的字节数据当作流来处理。一次发送一个字节并接收一次确认显然是不可行的。即使重叠传输（即不等待确认就发送下一个数据），速度也还是会非常缓慢。<br><img src="/images/2016/device-a-b.jpg" width="462" height="415" title="消息确认"><br>TCP消息确认机制如上图所示，首先，每一条消息都有一个识别编号，每一条消息都能够被独立地确认，因此同一时刻可以发送多条信息。设备B定期发送给A一条发送限制参数，制约设备A一次能发送的消息最大数量。设备B可以对该参数进行调整，以控制设备A的数据流。+</p>
+<p>为了提高速度，TCP并没有按照字节单个发送而是将数据流划分为片段。片段内所有字节都是一起发送和接收的，因此也是一起确认的。确认机制没有采用message ID字段，而是使用的片段内最后一个字节的sequence number。因此一次可以处理不同的字节数，这一数量即为片段内的sequence number。</p>
+<h3 id="TCP数据流的概念划分类别"><a href="#TCP数据流的概念划分类别" class="headerlink" title="TCP数据流的概念划分类别"></a>TCP数据流的概念划分类别</h3><p>假设A和B之间新建立了一条TCP连接。设备A需要传送一长串数据流，但设备B无法一次全部接收，所以它限制设备A每次发送分段指定数量的字节数，直到分段中已发送的字节数得到确认。之后，设备A可以继续发送更多字节。每一个设备都对发送，接收及确认数据进行追踪。</p>
+<p>如果我们在任一时间点对于这一过程做一个“快照”，那么我们可以将TCP buffer中的数据分为以下四类，并把它们看作一个时间轴：</p>
+<blockquote>
+<ul>
+<li>1.<strong>已发送已确认</strong> 数据流中最早的字节已经发送并得到确认。这些数据是站在发送设备的角度来看的。如下图所示，31个字节已经发送并确认。</li>
+<li>2.<strong>已发送但尚未确认</strong> 已发送但尚未得到确认的字节。发送方在确认之前，不认为这些数据已经被处理。下图所示14字节为第2类。</li>
+<li>3.<strong>未发送而接收方已Ready</strong><br>设备尚未将数据发出，但接收方根据最近一次关于发送方一次要发送多少字节确认自己有足够空间。发送方会立即尝试发送。如图，第3类有6字节</li>
+<li>4.<strong>未发送而接收方Not Ready</strong> 由于接收方not ready，还不允许将这部分数据发出。</li>
+</ul>
+</blockquote>
+<img src="/images/2016/tcp-byte-state.jpg" width="456" height="118" title="数据流概念">
+<p>接收方采用类似的机制来区分已接收并已确认，尚未接受但准备好接收，以及尚未接收并尚未准备好接收的数据。实际上，收发双方各自维护一套独立的变量，来监控发送和接收的数据流落在哪一类。<br>
+        
+          <p class="article-more-link">
+            <a href="/2016/12/04/细说TCP滑动窗口/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://kkzhou.com/2016/12/04/细说TCP滑动窗口/" data-id="ciwa00rk90005esojx7e8h0v4" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Java常见GC参数介绍" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/11/30/Java常见GC参数介绍/" class="article-date">
@@ -108,7 +171,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://kkzhou.com/2016/11/30/Java常见GC参数介绍/" data-id="ciw515xeq0001ckojk4qigznr" class="article-share-link">Share</a>
+      <a data-url="http://kkzhou.com/2016/11/30/Java常见GC参数介绍/" data-id="ciwa00rju0001esojct0ipogc" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
@@ -158,7 +221,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://kkzhou.com/2015/12/12/sed-command/" data-id="ciw515xf30004ckojbeda077r" class="article-share-link">Share</a>
+      <a data-url="http://kkzhou.com/2015/12/12/sed-command/" data-id="ciwa00rk70004esoj4f6yyen3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux命令/">Linux命令</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Sed/">Sed</a></li></ul>
@@ -203,7 +266,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://kkzhou.com/2015/11/01/hexo使用示例/" data-id="ciw515xf00003ckoj5q8l9p8d" class="article-share-link">Share</a>
+      <a data-url="http://kkzhou.com/2015/11/01/hexo使用示例/" data-id="ciwa00rk40003esoj6z80zma8" class="article-share-link">Share</a>
       
       
     </footer>
@@ -248,7 +311,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://kkzhou.com/2015/10/31/hello-world/" data-id="ciw515xey0002ckojhnxub4lm" class="article-share-link">Share</a>
+      <a data-url="http://kkzhou.com/2015/10/31/hello-world/" data-id="ciwa00rk10002esojxzdsp13h" class="article-share-link">Share</a>
       
       
     </footer>
@@ -294,7 +357,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -304,6 +367,10 @@
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/12/04/细说TCP滑动窗口/">细说TCP滑动窗口</a>
+          </li>
         
           <li>
             <a href="/2016/11/30/Java常见GC参数介绍/">Java常见GC参数介绍</a>

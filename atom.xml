@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://kkzhou.com/"/>
-  <updated>2016-11-30T14:30:48.816Z</updated>
+  <updated>2016-12-04T02:10:22.821Z</updated>
   <id>http://kkzhou.com/</id>
   
   <author>
@@ -16,11 +16,111 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>细说TCP滑动窗口</title>
+    <link href="http://kkzhou.com/2016/12/04/%E7%BB%86%E8%AF%B4TCP%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/"/>
+    <id>http://kkzhou.com/2016/12/04/细说TCP滑动窗口/</id>
+    <published>2016-12-04T01:55:57.000Z</published>
+    <updated>2016-12-04T02:10:22.821Z</updated>
+    
+    <content type="html"><![CDATA[<hr>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>将TCP与UDP这样的简单传输协议区分开来的是它传输数据的质量。TCP对于发送数据进行跟踪，这种数据管理需要协议有以下两大关键功能：</p>
+<blockquote>
+<ul>
+<li>可靠性：保证数据确实到达目的地。如果未到达，能够发现并重传。</li>
+<li>数据流控：管理数据的发送速率，以使接收设备不致于过载。</li>
+</ul>
+</blockquote>
+<p>要完成这些任务，整个协议操作是围绕滑动窗口确认机制来进行的。因此，理解了滑动窗口，也就是理解了TCP。</p>
+<h2 id="更多信息"><a href="#更多信息" class="headerlink" title="更多信息"></a>更多信息</h2><h3 id="TCP面向流的滑动窗口确认机制"><a href="#TCP面向流的滑动窗口确认机制" class="headerlink" title="TCP面向流的滑动窗口确认机制:"></a>TCP面向流的滑动窗口确认机制:</h3><p>TCP将独立的字节数据当作流来处理。一次发送一个字节并接收一次确认显然是不可行的。即使重叠传输（即不等待确认就发送下一个数据），速度也还是会非常缓慢。<br><img src="/images/2016/device-a-b.jpg" width="462" height="415" title="消息确认"><br>TCP消息确认机制如上图所示，首先，每一条消息都有一个识别编号，每一条消息都能够被独立地确认，因此同一时刻可以发送多条信息。设备B定期发送给A一条发送限制参数，制约设备A一次能发送的消息最大数量。设备B可以对该参数进行调整，以控制设备A的数据流。+</p>
+<p>为了提高速度，TCP并没有按照字节单个发送而是将数据流划分为片段。片段内所有字节都是一起发送和接收的，因此也是一起确认的。确认机制没有采用message ID字段，而是使用的片段内最后一个字节的sequence number。因此一次可以处理不同的字节数，这一数量即为片段内的sequence number。</p>
+<h3 id="TCP数据流的概念划分类别"><a href="#TCP数据流的概念划分类别" class="headerlink" title="TCP数据流的概念划分类别"></a>TCP数据流的概念划分类别</h3><p>假设A和B之间新建立了一条TCP连接。设备A需要传送一长串数据流，但设备B无法一次全部接收，所以它限制设备A每次发送分段指定数量的字节数，直到分段中已发送的字节数得到确认。之后，设备A可以继续发送更多字节。每一个设备都对发送，接收及确认数据进行追踪。</p>
+<p>如果我们在任一时间点对于这一过程做一个“快照”，那么我们可以将TCP buffer中的数据分为以下四类，并把它们看作一个时间轴：</p>
+<blockquote>
+<ul>
+<li>1.<strong>已发送已确认</strong> 数据流中最早的字节已经发送并得到确认。这些数据是站在发送设备的角度来看的。如下图所示，31个字节已经发送并确认。</li>
+<li>2.<strong>已发送但尚未确认</strong> 已发送但尚未得到确认的字节。发送方在确认之前，不认为这些数据已经被处理。下图所示14字节为第2类。</li>
+<li>3.<strong>未发送而接收方已Ready</strong><br>设备尚未将数据发出，但接收方根据最近一次关于发送方一次要发送多少字节确认自己有足够空间。发送方会立即尝试发送。如图，第3类有6字节</li>
+<li>4.<strong>未发送而接收方Not Ready</strong> 由于接收方not ready，还不允许将这部分数据发出。</li>
+</ul>
+</blockquote>
+<img src="/images/2016/tcp-byte-state.jpg" width="456" height="118" title="数据流概念">
+<p>接收方采用类似的机制来区分已接收并已确认，尚未接受但准备好接收，以及尚未接收并尚未准备好接收的数据。实际上，收发双方各自维护一套独立的变量，来监控发送和接收的数据流落在哪一类。<br><a id="more"></a></p>
+<h3 id="Sequence-Number设定与同步："><a href="#Sequence-Number设定与同步：" class="headerlink" title="Sequence Number设定与同步："></a>Sequence Number设定与同步：</h3><p>发送方和接收方必须就它们将要为数据流中的字节指定的sequence number达成一致。这一过程称为同步，在TCP连接建立时完成。为了简化假设第一个字节sequence number是1，按照上图示例，四类字节如下：</p>
+<blockquote>
+<ul>
+<li>1.已发送已确认字节1至31。</li>
+<li>2.已发送但尚未确认字节32至45。</li>
+<li>3.未发送而接收方已Ready字节46至51。</li>
+<li>4.未发送而接收方Not Ready字节52至95。</li>
+</ul>
+</blockquote>
+<h3 id="发送窗口与可用窗口："><a href="#发送窗口与可用窗口：" class="headerlink" title="发送窗口与可用窗口："></a>发送窗口与可用窗口：</h3><p>整个过程关键的操作在于接收方允许发送方一次能容纳的未确认的字节数。这称为发送窗口，有时也称为窗口。该窗口决定了发送方允许传送的字节数，也是2类和3类的字节数之和。因此，最后两类（接收方准备好而尚未发送，接收方未准备好）的分界线在于添加了从第一个未确认字节开始的窗口。本例中，第一个未确认字节是32，整个窗口大小是20。</p>
+<p>可用窗口的定义是：考虑到正在传输的数据量，发送方仍被允许发送的数据量。实际上等于第3类的大小。左边界就是窗口中的第一个字节（字节32），右边界是窗口中最后一个字节（字节51）。概念的详细解释看下图。</p>
+<img src="/images/2016/tcp-window.jpg" width="458" height="187" title="tcp窗口">
+<h3 id="可用窗口字节发送后TCP类目与窗口大小的改变："><a href="#可用窗口字节发送后TCP类目与窗口大小的改变：" class="headerlink" title="可用窗口字节发送后TCP类目与窗口大小的改变："></a>可用窗口字节发送后TCP类目与窗口大小的改变：</h3><p>当上图中第三类的6字节立即发送之后，这6字节从第3类转移到第2类。字节变为如下：</p>
+<blockquote>
+<ul>
+<li>1.已发送已确认字节1至31。</li>
+<li>2.已发送但尚未确认字节32至51。</li>
+<li>3.未发送而接收方已Ready字节为0。</li>
+<li>4.未发送而接收方Not Ready字节52至95。</li>
+</ul>
+</blockquote>
+<img src="/images/2016/tcp-window-change.jpg" width="458" height="187" title="tcp窗口变化">
+<h3 id="确认处理以及窗口缩放："><a href="#确认处理以及窗口缩放：" class="headerlink" title="确认处理以及窗口缩放："></a>确认处理以及窗口缩放：</h3><p>过了一段时间，目标设备向发送方传回确认信息。目标设备不会特别列出它已经确认的字节，因为这会导致效率低下。 <strong>目标设备会发送自上一次成功接收后的最长字节数</strong>。</p>
+<p>例如，假设已发送未确认字节（32至45）分为4段传输：32-34，35-36，37-41，42-45。第1，2，4已经到达，而3段没有收到。接收方只会发回32-36的确认信息。接收方会保留42-45但不会确认，因为这会表示接收方已经收到了37-41。这是很必要的，因为TCP的确认机制是累计的，只使用一个数字来确认数据。这一数字是自上一次成功接收后的最长字节数。假设目标设备同样将窗口设为20字节。</p>
+<p>当发送设备接收到确认信息，则会将一部分第2类字节转移到第1类，因为它们已经得到了确认。由于5个字节已被确认，窗口大小没有改变，允许发送方多发5个字节。结果，窗口向右滑动5个字节。同时5个字节从第二类移动到第1类，5个字节从第4类移动至第3类，为接下来的传输创建了新的可用窗口。因此，在接收到确认信息以后，看起来如下图所示。字节变为如下：</p>
+<blockquote>
+<ul>
+<li>1.已发送已确认字节1至36。</li>
+<li>2.已发送但尚未确认字节37至51。</li>
+<li>3.未发送而接收方已Ready字节为52至56。</li>
+<li>4.未发送而接收方Not Ready字节57至95。</li>
+</ul>
+</blockquote>
+<img src="/images/2016/tcp-window-change.jpg" width="451" height="146" title="tcp重发">
+<p>每一次确认接收以后，这一过程都会发生，从而让窗口滑动过整个数据流以供传输。</p>
+<h3 id="处理丢失确认信息："><a href="#处理丢失确认信息：" class="headerlink" title="处理丢失确认信息："></a>处理丢失确认信息：</h3><p>但是丢失的42-45如何处理呢？在接收到第3段（37-41）之前，接收设备不会发送确认信息，也不会发送这一段之后字节的确认信息。发送设备可以将新的字节添加到第3类之后，即52-56。发送设备之后会停止发送，窗口停留在37-41。</p>
+<p>TCP包括一个传输及重传的计时机制。TCP会重传丢失的片段。但有一个缺陷是：因为它不会对每一个片段分别进行确认，这可能会导致其他实际上已经接收到的片段被重传（比如42至45）。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;hr&gt;
+&lt;h2 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h2&gt;&lt;p&gt;将TCP与UDP这样的简单传输协议区分开来的是它传输数据的质量。TCP对于发送数据进行跟踪，这种数据管理需要协议有以下两大关键功能：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;可靠性：保证数据确实到达目的地。如果未到达，能够发现并重传。&lt;/li&gt;
+&lt;li&gt;数据流控：管理数据的发送速率，以使接收设备不致于过载。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;要完成这些任务，整个协议操作是围绕滑动窗口确认机制来进行的。因此，理解了滑动窗口，也就是理解了TCP。&lt;/p&gt;
+&lt;h2 id=&quot;更多信息&quot;&gt;&lt;a href=&quot;#更多信息&quot; class=&quot;headerlink&quot; title=&quot;更多信息&quot;&gt;&lt;/a&gt;更多信息&lt;/h2&gt;&lt;h3 id=&quot;TCP面向流的滑动窗口确认机制&quot;&gt;&lt;a href=&quot;#TCP面向流的滑动窗口确认机制&quot; class=&quot;headerlink&quot; title=&quot;TCP面向流的滑动窗口确认机制:&quot;&gt;&lt;/a&gt;TCP面向流的滑动窗口确认机制:&lt;/h3&gt;&lt;p&gt;TCP将独立的字节数据当作流来处理。一次发送一个字节并接收一次确认显然是不可行的。即使重叠传输（即不等待确认就发送下一个数据），速度也还是会非常缓慢。&lt;br&gt;&lt;img src=&quot;/images/2016/device-a-b.jpg&quot; width=&quot;462&quot; height=&quot;415&quot; title=&quot;消息确认&quot;&gt;&lt;br&gt;TCP消息确认机制如上图所示，首先，每一条消息都有一个识别编号，每一条消息都能够被独立地确认，因此同一时刻可以发送多条信息。设备B定期发送给A一条发送限制参数，制约设备A一次能发送的消息最大数量。设备B可以对该参数进行调整，以控制设备A的数据流。+&lt;/p&gt;
+&lt;p&gt;为了提高速度，TCP并没有按照字节单个发送而是将数据流划分为片段。片段内所有字节都是一起发送和接收的，因此也是一起确认的。确认机制没有采用message ID字段，而是使用的片段内最后一个字节的sequence number。因此一次可以处理不同的字节数，这一数量即为片段内的sequence number。&lt;/p&gt;
+&lt;h3 id=&quot;TCP数据流的概念划分类别&quot;&gt;&lt;a href=&quot;#TCP数据流的概念划分类别&quot; class=&quot;headerlink&quot; title=&quot;TCP数据流的概念划分类别&quot;&gt;&lt;/a&gt;TCP数据流的概念划分类别&lt;/h3&gt;&lt;p&gt;假设A和B之间新建立了一条TCP连接。设备A需要传送一长串数据流，但设备B无法一次全部接收，所以它限制设备A每次发送分段指定数量的字节数，直到分段中已发送的字节数得到确认。之后，设备A可以继续发送更多字节。每一个设备都对发送，接收及确认数据进行追踪。&lt;/p&gt;
+&lt;p&gt;如果我们在任一时间点对于这一过程做一个“快照”，那么我们可以将TCP buffer中的数据分为以下四类，并把它们看作一个时间轴：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;1.&lt;strong&gt;已发送已确认&lt;/strong&gt; 数据流中最早的字节已经发送并得到确认。这些数据是站在发送设备的角度来看的。如下图所示，31个字节已经发送并确认。&lt;/li&gt;
+&lt;li&gt;2.&lt;strong&gt;已发送但尚未确认&lt;/strong&gt; 已发送但尚未得到确认的字节。发送方在确认之前，不认为这些数据已经被处理。下图所示14字节为第2类。&lt;/li&gt;
+&lt;li&gt;3.&lt;strong&gt;未发送而接收方已Ready&lt;/strong&gt;&lt;br&gt;设备尚未将数据发出，但接收方根据最近一次关于发送方一次要发送多少字节确认自己有足够空间。发送方会立即尝试发送。如图，第3类有6字节&lt;/li&gt;
+&lt;li&gt;4.&lt;strong&gt;未发送而接收方Not Ready&lt;/strong&gt; 由于接收方not ready，还不允许将这部分数据发出。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;img src=&quot;/images/2016/tcp-byte-state.jpg&quot; width=&quot;456&quot; height=&quot;118&quot; title=&quot;数据流概念&quot;&gt;
+&lt;p&gt;接收方采用类似的机制来区分已接收并已确认，尚未接受但准备好接收，以及尚未接收并尚未准备好接收的数据。实际上，收发双方各自维护一套独立的变量，来监控发送和接收的数据流落在哪一类。&lt;br&gt;
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
     <title>Java常见GC参数介绍</title>
     <link href="http://kkzhou.com/2016/11/30/Java%E5%B8%B8%E8%A7%81GC%E5%8F%82%E6%95%B0%E4%BB%8B%E7%BB%8D/"/>
     <id>http://kkzhou.com/2016/11/30/Java常见GC参数介绍/</id>
     <published>2016-11-30T13:44:15.000Z</published>
-    <updated>2016-11-30T14:30:48.816Z</updated>
+    <updated>2016-12-04T01:57:48.231Z</updated>
     
     <content type="html"><![CDATA[<p>以下是经常配置用来优化JVM的一些参数</p>
 <blockquote>
@@ -36,7 +136,7 @@
 <li>-XX:+UseCMSInitiatingOccupancyOnly 表示只在到达阀值的时候，才进行CMS GC <a id="more"></a></li>
 <li>-XX:CMSInitiatingOccupancyFraction=70 设置阀值为70%，默认为68%。 </li>
 <li>-XX:+UseCompressedOops JVM优化之压缩普通对象指针（CompressedOops），通常64位JVM消耗的内存会比32位的大1.5倍，这是因为对象指针在64位架构下，长度会翻倍（更宽的寻址）。对于那些将要从32位平台移植到64位的应用来说，平白无辜多了1/2的内存占用，这是开发者不愿意看到的。幸运的是，从JDK 1.6 update14开始，64 bit JVM正式支持了 -XX:+UseCompressedOops 这个可以压缩指针，起到节约内存占用的新参数.</li>
-<li>关于-XX:+UseCMSInitiatingOccupancyOnly 和 -XX:CMSInitiatingOccupancyFraction ，详细解释见下：<br>The concurrent collection generally cannot be sped up but it can be started earlier.<br>A concurrent collection starts running when the percentage of allocated space in the old generation crosses a threshold. This threshold is calculated based on general experience with the concurrent collector. If full collections are occurring, the concurrent collections may need to be started earlier. The command line flag CMSInitiatingOccupancyFraction can be used to set the level at which the collection is started. Its default value is approximately 68%. The command line to adjust the value is<br>-XX:CMSInitiatingOccupancyFraction=<percent><br>The concurrent collector also keeps statistics on the promotion rate into the old generation for the application and makes a prediction on when to start a concurrent collection based on that promotion rate and the available free space in the old generation. Whereas the use of CMSInitiatingOccupancyFraction must be conservative to avoid full collections over the life of the application, the start of a concurrent collection based on the anticipated promotion adapts to the changing requirements of the application. The statistics that are used to calculate the promotion rate are based on the recent concurrent collections. The promotion rate is not calculated until at least one concurrent collection has completed so at least the first concurrent collection has to be initiated because the occupancy has reached CMSInitiatingOccupancyFraction . Setting CMSInitiatingOccupancyFraction to 100 would not cause only the anticipated promotion to be used to start a concurrent collection but would rather cause only non-concurrent collections to occur since a concurrent collection would not start until it was already too late. To eliminate the use of the anticipated promotions to start a concurrent collection set UseCMSInitiatingOccupancyOnly to true.<br>-XX:+UseCMSInitiatingOccupancyOnly.</percent></li>
+<li>关于-XX:+UseCMSInitiatingOccupancyOnly 和 -XX:CMSInitiatingOccupancyFraction ，详细解释见下：<br>The concurrent collection generally cannot be sped up but it can be started earlier.A concurrent collection starts running when the percentage of allocated space in the old generation crosses a threshold. This threshold is calculated based on general experience with the concurrent collector. If full collections are occurring, the concurrent collections may need to be started earlier. The command line flag CMSInitiatingOccupancyFraction can be used to set the level at which the collection is started. Its default value is approximately 68%. The command line to adjust the value is -XX:CMSInitiatingOccupancyFraction=<percent> The concurrent collector also keeps statistics on the promotion rate into the old generation for the application and makes a prediction on when to start a concurrent collection based on that promotion rate and the available free space in the old generation. Whereas the use of CMSInitiatingOccupancyFraction must be conservative to avoid full collections over the life of the application, the start of a concurrent collection based on the anticipated promotion adapts to the changing requirements of the application. The statistics that are used to calculate the promotion rate are based on the recent concurrent collections. The promotion rate is not calculated until at least one concurrent collection has completed so at least the first concurrent collection has to be initiated because the occupancy has reached CMSInitiatingOccupancyFraction . Setting CMSInitiatingOccupancyFraction to 100 would not cause only the anticipated promotion to be used to start a concurrent collection but would rather cause only non-concurrent collections to occur since a concurrent collection would not start until it was already too late. To eliminate the use of the anticipated promotions to start a concurrent collection set UseCMSInitiatingOccupancyOnly to true. -XX:+UseCMSInitiatingOccupancyOnly.</percent></li>
 </ul>
 </blockquote>
 ]]></content>
